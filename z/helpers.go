@@ -10,20 +10,20 @@ import (
   "time"
   "math"
   "errors"
+
+  "github.com/jinzhu/now"
 )
 
 
 const (
   TFAbsTwelveHour int = 0
-  TFAbsTwentyfourHour int = 1
-  TFRelHourMinute int = 2
-  TFRelHourFraction int = 3
+  TFRelHourMinute int = 1
+  TFRelHourFraction int = 2
 )
 
 func TimeFormats() []string {
   return []string{
     `^\d{1,2}:\d{1,2}(am|pm)$`, // Absolute twelve hour format
-    `^\d{1,2}:\d{1,2}$`, // Absolute twenty four hour format
     `^([+-])(\d{1,2}):(\d{1,2})$`, // Relative hour:minute format
     `^([+-])(\d{1,2})\.(\d{1,2})$`, // Relative hour.fraction format
   }
@@ -98,14 +98,10 @@ func ParseTime(timeStr string) (time.Time, error) {
     tadj, err := time.Parse("3:04pm", timeStr)
     tnew := time.Date(t.Year(), t.Month(), t.Day(), tadj.Hour(), tadj.Minute(), t.Second(), t.Nanosecond(), t.Location())
     return tnew, err
-  case TFAbsTwentyfourHour:
-    tadj, err := time.Parse("15:04", timeStr)
-    tnew := time.Date(t.Year(), t.Month(), t.Day(), tadj.Hour(), tadj.Minute(), t.Second(), t.Nanosecond(), t.Location())
-    return tnew, err
   case TFRelHourMinute, TFRelHourFraction:
     return RelToTime(timeStr, tfId)
   default:
-    return time.Now(), errors.New("could not match passed time")
+    return now.Parse(timeStr)
   }
 }
 
